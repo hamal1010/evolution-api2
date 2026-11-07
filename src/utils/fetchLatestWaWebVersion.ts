@@ -2,6 +2,15 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { fetchLatestBaileysVersion, WAVersion } from 'baileys';
 
 export const fetchLatestWaWebVersion = async (options: AxiosRequestConfig<{}>) => {
+  // Optional pin, e.g. CONFIG_SESSION_PHONE_VERSION=2.3000.1043857760 (Baileys default).
+  const pinned = (process.env.CONFIG_SESSION_PHONE_VERSION || '').trim();
+  if (/^\d+\.\d+\.\d+$/.test(pinned)) {
+    return {
+      version: pinned.split('.').map(Number) as WAVersion,
+      isLatest: false,
+    };
+  }
+
   try {
     const { data } = await axios.get('https://web.whatsapp.com/sw.js', {
       ...options,

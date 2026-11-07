@@ -83,6 +83,7 @@ import { Instance, Message } from '@prisma/client';
 import { createJid } from '@utils/createJid';
 import { fetchLatestWaWebVersion } from '@utils/fetchLatestWaWebVersion';
 import { makeProxyAgent, makeProxyAgentUndici } from '@utils/makeProxyAgent';
+import { attachOfflineBatchPuller } from '@utils/offlineBatchPuller';
 import { getOnWhatsappCache, saveOnWhatsappCache } from '@utils/onWhatsappCache';
 import { status } from '@utils/renderStatus';
 import { sendTelemetry } from '@utils/sendTelemetry';
@@ -702,6 +703,9 @@ export class BaileysStartupService extends ChannelStartupService {
     }
 
     this.eventHandler();
+
+    // Keep pulling the offline backlog until the server finishes it (Baileys only asks once).
+    attachOfflineBatchPuller(this.client, this.logger, this.instance.name);
 
     this.client.ws.on('CB:call', (packet) => {
       console.log('CB:call', packet);
